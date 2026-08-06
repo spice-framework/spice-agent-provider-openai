@@ -37,6 +37,8 @@ var _ model.Provider = (*Client)(nil)
 
 // Stream translates one provider-neutral request into an OpenAI Responses
 // stream. Request.Model is authoritative; configuration never overrides it.
+// The returned stream supports one Recv caller racing with Close. Concurrent
+// Recv calls are outside the model.Stream contract.
 func (client *Client) Stream(ctx context.Context, request model.Request) (model.Stream, error) {
 	if client == nil || client.start == nil {
 		return nil, providerStartError("provider_unavailable", "OpenAI provider is unavailable", false, nil)
@@ -419,16 +421,28 @@ func (value *stream) nextRaw(ctx context.Context) (responses.ResponseStreamEvent
 		return responses.ResponseStreamEventUnion{}, false, value.operationErr()
 	case result, ok := <-value.raw:
 		if !ok {
-			return responses.ResponseStreamEventUnion{}, false, nil
+			return responses.ResponseStreamEventUnion{}, false, value.endError()
 		}
 		if result.err != nil {
 			return responses.ResponseStreamEventUnion{}, false, normalizeFailure(result.err, false)
 		}
 		if result.event.Type == "" {
-			return responses.ResponseStreamEventUnion{}, false, nil
+			return responses.ResponseStreamEventUnion{}, false, value.endError()
 		}
 		return result.event, true, nil
 	}
+}
+
+func (value *stream) endError() error {
+	if value.operationErr != nil {
+		if err := value.operationErr(); err != nil {
+			return err
+		}
+	}
+	if value.terminal {
+		return nil
+	}
+	return errors.New("OpenAI response stream ended before a terminal event")
 }
 
 func (value *stream) translate(raw responses.ResponseStreamEventUnion) ([]model.StreamEvent, bool, error) {

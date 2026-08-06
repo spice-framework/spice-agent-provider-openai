@@ -208,6 +208,38 @@ func TestRecvHonorsDistinctContextDeadline(t *testing.T) {
 	}
 }
 
+func TestRecvMayRaceClose(t *testing.T) {
+	t.Parallel()
+	source := newBlockingSource(streamEvent(t, `{"type":"response.created","sequence_number":1,"response":{"id":"r"}}`))
+	stream, err := testClient(source).Stream(t.Context(), testRequest(t, "model", false))
+	if err != nil {
+		t.Fatal(err)
+	}
+	received := make(chan error, 1)
+	receiveContext := &observedContext{done: make(chan struct{}), entered: make(chan struct{})}
+	go func() {
+		_, receiveErr := stream.Recv(receiveContext)
+		received <- receiveErr
+	}()
+	select {
+	case <-receiveContext.entered:
+	case <-time.After(time.Second):
+		t.Fatal("Recv did not start waiting")
+	}
+	if err = stream.Close(); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case receiveErr := <-received:
+		var streamFailure *model.StreamError
+		if !errors.As(receiveErr, &streamFailure) || streamFailure.Problem().Code() != "cancelled" {
+			t.Fatalf("Recv racing Close = %T %v", receiveErr, receiveErr)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("Recv did not return after Close")
+	}
+}
+
 func TestTerminalFailuresAreTypedAndRedacted(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -473,8 +505,9 @@ func TestHTTPAdapterIsOfflineTestableAndDoesNotRetryPartialStream(t *testing.T) 
 		t.Fatalf("Recv(text) = %#v, %v", event, err)
 	}
 	_, err = stream.Recv(t.Context())
-	if !errors.Is(err, io.EOF) {
-		t.Fatalf("Recv(incomplete) = %v", err)
+	var streamFailure *model.StreamError
+	if !errors.As(err, &streamFailure) || streamFailure.Problem().Code() != "transport_error" || streamFailure.Problem().Retryable() {
+		t.Fatalf("Recv(incomplete) = %T %v", err, err)
 	}
 	mustClose(t, stream)
 	if requests.Load() != 1 || !sawAuthorization.Load() || !sawIdempotency.Load() {
@@ -691,6 +724,22 @@ func (source *blockingSource) Close() error {
 	source.close.Do(func() { close(source.closed) })
 	return nil
 }
+
+type observedContext struct {
+	done    <-chan struct{}
+	entered chan struct{}
+	once    sync.Once
+}
+
+func (*observedContext) Deadline() (time.Time, bool) { return time.Time{}, false }
+
+func (ctx *observedContext) Done() <-chan struct{} {
+	ctx.once.Do(func() { close(ctx.entered) })
+	return ctx.done
+}
+
+func (*observedContext) Err() error    { return nil }
+func (*observedContext) Value(any) any { return nil }
 
 func testClient(source responseSource) *Client {
 	return &Client{start: func(context.Context, responses.ResponseNewParams, ...option.RequestOption) responseSource {

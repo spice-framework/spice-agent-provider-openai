@@ -41,7 +41,10 @@ verification; there is no custom dependency system.
 Each operation derives from the caller context. After synchronously acquiring
 the first response event, one bounded pump owns the SDK stream; `Close` cancels
 and joins it. A separate `Recv` deadline does not create an unbounded helper
-goroutine.
+goroutine. Configuration accepts request timeouts from greater than zero through
+thirty minutes; zero selects the two-minute default. One receiver may race with
+`Close` safely. Application-supplied transports remain trusted cooperative code
+and must honor context cancellation or close.
 
 The SDK retry count is explicit and bounded to 0–8. A stable hashed idempotency
 key is supplied for startup attempts. The adapter never retries after returning

@@ -28,7 +28,8 @@ func TestNewRejectsInvalidConfigurationWithoutLeakingSecret(t *testing.T) {
 		{name: "key", config: Config{}, want: "API key is required"},
 		{name: "scheme", config: Config{APIKey: "secret", BaseURL: "http://api.example.test"}, want: "absolute HTTPS"},
 		{name: "userinfo", config: Config{APIKey: "secret", BaseURL: "https://user@api.example.test"}, want: "without user information"},
-		{name: "timeout", config: Config{APIKey: "secret", Timeout: -time.Second}, want: "timeout must be positive"},
+		{name: "timeout negative", config: Config{APIKey: "secret", Timeout: -time.Second}, want: "timeout must be positive"},
+		{name: "timeout over maximum", config: Config{APIKey: "secret", Timeout: maximumTimeout + time.Nanosecond}, want: "no greater than 30m0s"},
 		{name: "retries low", config: Config{APIKey: "secret", MaxRetries: -1}, want: "between 0 and 8"},
 		{name: "retries high", config: Config{APIKey: "secret", MaxRetries: 9}, want: "between 0 and 8"},
 	}
@@ -43,6 +44,16 @@ func TestNewRejectsInvalidConfigurationWithoutLeakingSecret(t *testing.T) {
 				t.Fatalf("New() error leaked secret: %v", err)
 			}
 		})
+	}
+}
+
+func TestTimeoutBoundary(t *testing.T) {
+	t.Parallel()
+	if got := normalizedTimeout(0); got != defaultTimeout {
+		t.Fatalf("normalizedTimeout(0) = %s, want %s", got, defaultTimeout)
+	}
+	if _, err := New(Config{APIKey: "secret", Timeout: maximumTimeout}); err != nil {
+		t.Fatalf("New(maximum timeout) error = %v", err)
 	}
 }
 

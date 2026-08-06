@@ -13,7 +13,7 @@ does not claim to sandbox network activity.
 | Duplicate side effects | A hashed operation idempotency key protects startup attempts; no provider retry occurs after a stream is returned. |
 | Partial tool execution | Only finalized function calls in `response.completed` become Spice calls; malformed, duplicate, undeclared, and hosted calls fail closed. |
 | Unbounded output | Core 4 MiB operation-text and 128 tool-call caps plus provider input/output-item bounds and 64 KiB translated chunks. |
-| Unbounded wait or goroutine accumulation | Caller operation context, bounded configured timeout, one bounded stream pump, per-`Recv` context selection, and joined close. |
+| Unbounded wait or goroutine accumulation | Caller operation context, two-minute default and thirty-minute maximum configured timeout, one bounded stream pump, per-`Recv` context selection, and joined cooperative close. |
 | Protocol/transport leakage | Startup and receive errors are typed separately; public text is generic, safe metadata is allowlisted, and raw upstream failures are not exposed. |
 | Global cross-tenant state | One client/service/HTTP transport per injected provider bean; no registry or package-level mutable client. |
 | Accidental live traffic | Unit/integration tests use scripted sources or fake TLS HTTP; live acceptance requires an explicit environment switch and credentials. |
@@ -21,5 +21,7 @@ does not claim to sandbox network activity.
 Residual trust is explicit: application code supplies the HTTP client and
 endpoint policy, and the OpenAI SDK performs the HTTPS exchange. A custom
 transport can observe requests and credentials and must be treated as trusted
-application code. Provider metadata is discarded by the engine unless the
-application explicitly allowlists `openaiprovider.MetadataNamespace`.
+application code. A transport that ignores context cancellation and close can
+prevent cooperative shutdown; the provider does not claim forcible containment.
+Provider metadata is discarded by the engine unless the application explicitly
+allowlists `openaiprovider.MetadataNamespace`.

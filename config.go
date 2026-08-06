@@ -19,11 +19,14 @@ import (
 const (
 	defaultBaseURL = "https://api.openai.com/v1"
 	defaultTimeout = 2 * time.Minute
+	maximumTimeout = 30 * time.Minute
 	maximumRetries = 8
 )
 
 // Config is the typed, secret-aware configuration for one provider instance.
 // APIKey is deliberately excluded from String output and validation errors.
+// A zero Timeout selects two minutes; explicit values must not exceed thirty
+// minutes.
 type Config struct {
 	APIKey       string        `spice:"api-key,required,secret,env=OPENAI_API_KEY"`
 	BaseURL      string        `spice:"base-url,default=https://api.openai.com/v1,env=OPENAI_BASE_URL"`
@@ -148,8 +151,8 @@ func (config Config) validate() error {
 	if err != nil || endpoint.Scheme != "https" || endpoint.Host == "" || endpoint.User != nil {
 		return errors.New("OpenAI base URL must be an absolute HTTPS URL without user information")
 	}
-	if config.Timeout <= 0 {
-		return errors.New("OpenAI timeout must be positive")
+	if config.Timeout <= 0 || config.Timeout > maximumTimeout {
+		return fmt.Errorf("OpenAI timeout must be positive and no greater than %s", maximumTimeout)
 	}
 	if config.MaxRetries < 0 || config.MaxRetries > maximumRetries {
 		return fmt.Errorf("OpenAI max retries must be between 0 and %d", maximumRetries)

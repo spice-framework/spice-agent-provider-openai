@@ -12,6 +12,8 @@
 | Operating systems | Windows, Linux, and macOS |
 | Network | HTTPS OpenAI-compatible Responses endpoint; no construction-time network activity |
 | Tests | Offline scripted/fake-TLS tests by default; explicitly enabled live acceptance |
+| Request timeout | Two-minute default; positive values through thirty minutes |
+| Stream concurrency | One `Recv` caller may race with `Close`; concurrent `Recv` calls unsupported |
 
 Request model selection is always `model.Request.Model`. The adapter supports
 provider-neutral text, function calls/results, function definitions, usage,

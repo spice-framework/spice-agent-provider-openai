@@ -22,7 +22,8 @@ provider, err := openaiprovider.New(openaiprovider.Config{
 Construction validates configuration but performs no network request. The
 provider never reads environment variables itself; the example deliberately
 shows application-owned configuration. A request must choose its model through
-`model.Request.Model`.
+`model.Request.Model`. A zero timeout selects two minutes; configured request
+timeouts must be positive and no greater than thirty minutes.
 
 Applications may opt into one replaceable fallback bean with an explicit blank
 import:
@@ -45,7 +46,8 @@ The generated request sets `store=false`.
 Failures before a stream exists are `model.ProviderError`; receive failures are
 `model.StreamError`. Provider retries are bounded and permitted only before the
 SDK has returned a stream. Spice never replays an observed or ambiguous stream.
-All public failures are redacted.
+All public failures are redacted. One goroutine may call `Recv` while another
+calls `Close`; concurrent `Recv` calls are not supported.
 
 Successful and failed terminal events can carry a small allowlisted metadata
 record. To retain it in engine observations, composition must explicitly
