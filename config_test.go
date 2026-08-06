@@ -9,11 +9,11 @@ import (
 
 func TestNewConstructsWithoutNetworkAndNormalizesDefaults(t *testing.T) {
 	t.Parallel()
-	client, err := New(Config{APIKey: " test-secret ", Model: " gpt-test "})
+	client, err := New(Config{APIKey: " test-secret "})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if client.Model() != "gpt-test" || client.Responses() == nil {
+	if client.start == nil {
 		t.Fatalf("New() = %#v, want configured Responses client", client)
 	}
 }
@@ -25,13 +25,12 @@ func TestNewRejectsInvalidConfigurationWithoutLeakingSecret(t *testing.T) {
 		config Config
 		want   string
 	}{
-		{name: "key", config: Config{Model: "model"}, want: "API key is required"},
-		{name: "model", config: Config{APIKey: "secret"}, want: "model is required"},
-		{name: "scheme", config: Config{APIKey: "secret", Model: "model", BaseURL: "http://api.example.test"}, want: "absolute HTTPS"},
-		{name: "userinfo", config: Config{APIKey: "secret", Model: "model", BaseURL: "https://user@api.example.test"}, want: "without user information"},
-		{name: "timeout", config: Config{APIKey: "secret", Model: "model", Timeout: -time.Second}, want: "timeout must be positive"},
-		{name: "retries low", config: Config{APIKey: "secret", Model: "model", MaxRetries: -1}, want: "between 0 and 8"},
-		{name: "retries high", config: Config{APIKey: "secret", Model: "model", MaxRetries: 9}, want: "between 0 and 8"},
+		{name: "key", config: Config{}, want: "API key is required"},
+		{name: "scheme", config: Config{APIKey: "secret", BaseURL: "http://api.example.test"}, want: "absolute HTTPS"},
+		{name: "userinfo", config: Config{APIKey: "secret", BaseURL: "https://user@api.example.test"}, want: "without user information"},
+		{name: "timeout", config: Config{APIKey: "secret", Timeout: -time.Second}, want: "timeout must be positive"},
+		{name: "retries low", config: Config{APIKey: "secret", MaxRetries: -1}, want: "between 0 and 8"},
+		{name: "retries high", config: Config{APIKey: "secret", MaxRetries: 9}, want: "between 0 and 8"},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -49,7 +48,7 @@ func TestNewRejectsInvalidConfigurationWithoutLeakingSecret(t *testing.T) {
 
 func TestNewValidatesOptions(t *testing.T) {
 	t.Parallel()
-	config := Config{APIKey: "secret", Model: "model"}
+	config := Config{APIKey: "secret"}
 	if _, err := New(config, nil); err == nil || !strings.Contains(err.Error(), "option 0 is nil") {
 		t.Fatalf("New(nil option) error = %v", err)
 	}
@@ -64,17 +63,9 @@ func TestNewValidatesOptions(t *testing.T) {
 
 func TestConfigStringRedactsAPIKey(t *testing.T) {
 	t.Parallel()
-	text := (Config{APIKey: "top-secret", Model: "model"}).String()
+	text := (Config{APIKey: "top-secret"}).String()
 	if strings.Contains(text, "top-secret") || !strings.Contains(text, "api_key=<redacted>") {
 		t.Fatalf("Config.String() = %q", text)
-	}
-}
-
-func TestNilClientAccessorsAreSafe(t *testing.T) {
-	t.Parallel()
-	var client *Client
-	if client.Model() != "" || client.Responses() != nil {
-		t.Fatal("nil Client accessors returned values")
 	}
 }
 
@@ -82,8 +73,15 @@ func TestManifest(t *testing.T) {
 	t.Parallel()
 	spec := Manifest().Spec()
 	if spec.Module != "github.com/spice-framework/spice-agent-provider-openai" ||
-		len(spec.Dependencies) != 1 ||
-		spec.Dependencies[0].Version != "v3.50.0" {
+		len(spec.Dependencies) != 2 {
 		t.Fatalf("Manifest().Spec() = %#v", spec)
+	}
+	versions := make(map[string]string, len(spec.Dependencies))
+	for _, dependency := range spec.Dependencies {
+		versions[dependency.Module] = dependency.Version
+	}
+	if versions["github.com/spice-framework/spice-agent"] != "v0.0.0-20260806183953-eaf19180429a" ||
+		versions["github.com/openai/openai-go/v3"] != "v3.50.0" {
+		t.Fatalf("Manifest().Spec().Dependencies = %#v", spec.Dependencies)
 	}
 }

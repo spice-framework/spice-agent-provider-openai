@@ -1,13 +1,15 @@
 # Roadmap
 
-The canonical cross-repository program is maintained in
-`spice-agent/docs/implementation/README.md`.
+The canonical cross-repository implementation ledger is maintained in
+`spice-agent/docs/implementation/README.md`. This repository does not maintain
+a second phase numbering system.
 
-| Phase | Repository outcome | Status |
-|---|---|---|
-| 0 | Governance, exact dependency pins, concrete no-network client, manifest, explicit autoconfiguration, and quality gates | in progress |
-| 3 | Responses streaming adapter, tool-call translation, usage, cancellation, typed errors, and safe retry behavior | blocked on tagged core model API |
-| 6 | Distribution acceptance and signed architecture-proof preview | planned |
-| 8 | Stabilized provider authoring and compatibility policy | planned |
+The current contract is a complete OpenAI Responses implementation of
+`model.Provider`: bounded request translation, streamed text, finalized tool
+calls, usage, completion metadata, cancellation, typed redacted failures,
+offline fake-HTTP coverage, and an opt-in live acceptance.
 
-No phase may add a parallel container or perform ambient package discovery.
+Before a stable release, changes remain focused on compatibility evidence,
+additional provider fixtures, and the signed architecture-proof distribution.
+No milestone may add a parallel container, ambient discovery, raw content
+telemetry, or retry after an observed stream.

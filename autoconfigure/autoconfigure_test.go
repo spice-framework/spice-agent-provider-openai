@@ -8,8 +8,8 @@ import (
 
 func TestDefaultAndDescriptor(t *testing.T) {
 	t.Parallel()
-	client, err := Default(provider.Config{APIKey: "fixture", Model: "model"})
-	if err != nil || client.Model() != "model" {
+	client, err := Default(provider.Config{APIKey: "fixture"})
+	if err != nil || client == nil {
 		t.Fatalf("Default() = %#v, %v", client, err)
 	}
 	descriptor := SpiceAutoConfiguration()

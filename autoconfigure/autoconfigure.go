@@ -4,12 +4,13 @@ package autoconfigure
 
 import (
 	provider "github.com/spice-framework/spice-agent-provider-openai"
+	"github.com/spice-framework/spice-agent/model"
 	"github.com/spice-framework/spice/starter"
 )
 
 // Default constructs the fallback instance from application-owned typed
 // configuration. It performs no network I/O.
-func Default(config provider.Config) (*provider.Client, error) {
+func Default(config provider.Config) (model.Provider, error) {
 	return provider.New(config)
 }
 

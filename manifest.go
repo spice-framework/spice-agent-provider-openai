@@ -10,7 +10,7 @@ func Manifest() spicestarter.Manifest {
 		Version:   "0.1.0-dev",
 		Module:    "github.com/spice-framework/spice-agent-provider-openai",
 		SpiceAPI:  spicestarter.APIVersion,
-		MinimumGo: "1.26",
+		MinimumGo: "1.26.5",
 		License:   "Apache-2.0",
 		Review:    "docs/dependency-review.md",
 		Activation: spicestarter.Activation{
@@ -21,10 +21,17 @@ func Manifest() spicestarter.Manifest {
 			}},
 		},
 		Capabilities: []string{"agent.model.openai"},
-		Dependencies: []spicestarter.Dependency{{
-			Module:  "github.com/openai/openai-go/v3",
-			Version: "v3.50.0",
-			License: "Apache-2.0",
-		}},
+		Dependencies: []spicestarter.Dependency{
+			{
+				Module:  "github.com/spice-framework/spice-agent",
+				Version: "v0.0.0-20260806183953-eaf19180429a",
+				License: "Apache-2.0",
+			},
+			{
+				Module:  "github.com/openai/openai-go/v3",
+				Version: "v3.50.0",
+				License: "Apache-2.0",
+			},
+		},
 	})
 }

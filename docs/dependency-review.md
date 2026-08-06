@@ -1,47 +1,57 @@
-# Dependency review: OpenAI Go
+# Dependency review
 
 ## Decision
 
-Approved for this isolated provider module at exactly
-`github.com/openai/openai-go/v3 v3.50.0`. No other third-party runtime module is
-directly selected.
+Approved runtime dependencies are pinned to:
 
-## Maintenance and license
+- `github.com/spice-framework/spice-agent v0.0.0-20260806183953-eaf19180429a`
+- `github.com/openai/openai-go/v3 v3.50.0`
 
-The package is OpenAI's official Go SDK, generated and maintained from the API
-schema. Version 3.50.0 was selected for the architecture proof and requires Go
-1.25 or newer. The upstream license is Apache-2.0 and is retained in committed
-vendor contents. Version changes require an explicit API, license, vulnerability,
-and generated-dependency review.
+The first supplies the exact provider-neutral contracts and bounds. The second
+is OpenAI's official generated Go SDK for the Responses API. Both are
+Apache-2.0. Licenses are retained in committed vendor contents. Version changes
+require API, maintenance, license, vulnerability, cancellation, retry, and
+generated-dependency review.
+
+## Ownership and dependency direction
+
+This adapter depends on the agent SPI; the agent kernel never depends on this
+provider. It constructs an instance-owned `responses.ResponseService` with
+explicit options and exposes only `model.Provider`. No raw SDK client, response,
+or stream crosses the public boundary.
+
+Spice core and toolchain remain pinned at `v0.1.0-preview.1`. The compiler is
+authorized by the standard Go `tool` directive. All runtime and build modules
+participate in ordinary Go selection, checksums, vendoring, and offline
+verification; there is no custom dependency system.
 
 ## Security and privacy
 
-- The adapter constructs `responses.ResponseService` directly with explicit
-  options; it does not use `openai.NewClient` and therefore does not read ambient
+- The provider does not call `openai.NewClient`, so it does not capture ambient
   `OPENAI_*` variables.
-- API keys are required typed configuration and are marked secret for Spice
-  metadata. Public errors and diagnostic strings never contain the key.
+- API keys arrive only through explicit typed configuration and are secret
+  marked. Configuration and error strings redact them.
 - Only absolute HTTPS endpoints without URL user information are accepted.
-- Prompt, output, tool arguments, authorization headers, and raw provider bodies
-  are not general-purpose observability metadata.
-- Construction performs no network operation and creates no background goroutine.
+- Prompt/output content, tool arguments/results, headers, URLs, credentials,
+  raw response bodies, and raw SDK objects are excluded from metadata.
+- Construction performs no network operation and starts no goroutine.
 
-## Cancellation, retry, and ownership
+## Cancellation and retry
 
-Every eventual Responses operation is caller-context-owned. The provider owns
-one SDK service and HTTP client per constructed bean. Timeouts and retry counts
-are bounded. Phase 3 will disable replay once a stream is observed and will map
-partial-stream failure into an explicit terminal event.
+Each operation derives from the caller context. After synchronously acquiring
+the first response event, one bounded pump owns the SDK stream; `Close` cancels
+and joins it. A separate `Recv` deadline does not create an unbounded helper
+goroutine.
+
+The SDK retry count is explicit and bounded to 0–8. A stable hashed idempotency
+key is supplied for startup attempts. The adapter never retries after returning
+a stream, and the engine does not retry after observing an event. Ambiguous or
+partial streams are therefore never replayed by this module.
 
 ## Observability
 
-The planned adapter emits bounded operation identity, model identity, provider
-request ID, usage totals, duration, and typed outcome. Content and secrets are
-excluded unless an application deliberately installs a content recorder outside
-this module.
-
-## Build-only dependencies
-
-Spice core and toolchain are pinned at `v0.1.0-preview.1`. The toolchain is
-authorized through the standard Go `tool` directive. It participates in normal
-module selection and vendor verification; there is no custom dependency system.
+Provider metadata is optional, bounded, namespaced, and application-allowlisted.
+The only permitted fields are response ID, request ID, model, status, service
+tier, and HTTP status. Usage remains provider-neutral core data. Live testing is
+opt-in and never prints prompts, outputs, keys, authorization headers, or raw
+provider errors.

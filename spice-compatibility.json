@@ -3,5 +3,7 @@
   "minimum": "v0.1.0-preview.1",
   "current": "v0.1.0-preview.1",
   "toolchain": "v0.1.0-preview.1",
+  "spice_agent": "v0.0.0-20260806183953-eaf19180429a",
+  "openai_go": "v3.50.0",
   "go": "1.26.5"
 }

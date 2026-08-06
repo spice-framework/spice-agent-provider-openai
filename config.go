@@ -3,6 +3,7 @@
 package openaiprovider
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"github.com/openai/openai-go/v3/option"
+	"github.com/openai/openai-go/v3/packages/ssestream"
 	"github.com/openai/openai-go/v3/responses"
 )
 
@@ -24,7 +26,6 @@ const (
 // APIKey is deliberately excluded from String output and validation errors.
 type Config struct {
 	APIKey       string        `spice:"api-key,required,secret,env=OPENAI_API_KEY"`
-	Model        string        `spice:"model,required,env=OPENAI_MODEL"`
 	BaseURL      string        `spice:"base-url,default=https://api.openai.com/v1,env=OPENAI_BASE_URL"`
 	Organization string        `spice:"organization,env=OPENAI_ORGANIZATION"`
 	Project      string        `spice:"project,env=OPENAI_PROJECT"`
@@ -35,8 +36,7 @@ type Config struct {
 // String returns a diagnostic-safe summary.
 func (config Config) String() string {
 	return fmt.Sprintf(
-		"OpenAI(model=%q, base_url=%q, organization=%q, project=%q, timeout=%s, max_retries=%d, api_key=<redacted>)",
-		config.Model,
+		"OpenAI(base_url=%q, organization=%q, project=%q, timeout=%s, max_retries=%d, api_key=<redacted>)",
 		normalizedBaseURL(config.BaseURL),
 		config.Organization,
 		config.Project,
@@ -48,9 +48,17 @@ func (config Config) String() string {
 // Client owns one configured OpenAI Responses service. Construction performs
 // no network I/O and never consults ambient OpenAI environment variables.
 type Client struct {
-	responses responses.ResponseService
-	model     string
+	start streamStarter
 }
+
+type responseSource interface {
+	Next() bool
+	Current() responses.ResponseStreamEventUnion
+	Err() error
+	Close() error
+}
+
+type streamStarter func(context.Context, responses.ResponseNewParams, ...option.RequestOption) responseSource
 
 // ClientOption customizes client construction without adding hidden globals.
 type ClientOption func(*clientOptions) error
@@ -100,32 +108,16 @@ func New(config Config, options ...ClientOption) (*Client, error) {
 	if config.Project != "" {
 		requestOptions = append(requestOptions, option.WithProject(config.Project))
 	}
-	return &Client{
-		responses: responses.NewResponseService(requestOptions...),
-		model:     config.Model,
-	}, nil
+	service := responses.NewResponseService(requestOptions...)
+	return &Client{start: func(ctx context.Context, params responses.ResponseNewParams, options ...option.RequestOption) responseSource {
+		return service.NewStreaming(ctx, params, options...)
+	}}, nil
 }
 
-// Model returns the configured model identity.
-func (client *Client) Model() string {
-	if client == nil {
-		return ""
-	}
-	return client.model
-}
-
-// Responses returns the instance-owned SDK service used by the future
-// provider-neutral adapter.
-func (client *Client) Responses() *responses.ResponseService {
-	if client == nil {
-		return nil
-	}
-	return &client.responses
-}
+var _ responseSource = (*ssestream.Stream[responses.ResponseStreamEventUnion])(nil)
 
 func normalize(config Config) Config {
 	config.APIKey = strings.TrimSpace(config.APIKey)
-	config.Model = strings.TrimSpace(config.Model)
 	config.BaseURL = normalizedBaseURL(config.BaseURL)
 	config.Organization = strings.TrimSpace(config.Organization)
 	config.Project = strings.TrimSpace(config.Project)
@@ -151,9 +143,6 @@ func normalizedTimeout(value time.Duration) time.Duration {
 func (config Config) validate() error {
 	if config.APIKey == "" {
 		return errors.New("OpenAI API key is required")
-	}
-	if config.Model == "" {
-		return errors.New("OpenAI model is required")
 	}
 	endpoint, err := url.Parse(config.BaseURL)
 	if err != nil || endpoint.Scheme != "https" || endpoint.Host == "" || endpoint.User != nil {
