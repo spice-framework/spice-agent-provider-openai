@@ -91,7 +91,7 @@ func TestManifest(t *testing.T) {
 	for _, dependency := range spec.Dependencies {
 		versions[dependency.Module] = dependency.Version
 	}
-	if versions["github.com/spice-framework/spice-agent"] != "v0.0.0-20260806191411-841edd3d47ad" ||
+	if versions["github.com/spice-framework/spice-agent"] != "v0.0.0-20260806204214-1f072842707a" ||
 		versions["github.com/openai/openai-go/v3"] != "v3.50.0" {
 		t.Fatalf("Manifest().Spec().Dependencies = %#v", spec.Dependencies)
 	}
