@@ -56,7 +56,10 @@ record is limited to response/request IDs, model, status, service tier, and HTTP
 status; it cannot contain prompts, results, tool arguments, headers, tokens,
 keys, URLs, or raw provider objects.
 
-Run the offline suite with `make verify`. The live acceptance is opt-in:
+On a fresh clone, run `make tools-bootstrap` once to populate the exact product
+and tools module graphs without changing tracked module files. All ordinary
+quality targets remain offline. Run the offline suite with `make verify`. The
+live acceptance is opt-in:
 
 ```text
 SPICE_OPENAI_LIVE=1 OPENAI_API_KEY=<secret> OPENAI_MODEL=<model> go test -run TestLiveOpenAIResponse
