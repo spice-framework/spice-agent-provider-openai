@@ -26,3 +26,9 @@ Linux shells, and macOS shells. It never rewrites product source. `make fmt` is
 the only formatting target that mutates Go files. `make fast`, `make check`, and
 `make verify` force `GOPROXY=off`; a missing cache entry fails with an actionable
 prompt to run the explicit bootstrap.
+
+The billable live provider proof is deliberately outside this contract. It is
+compiled only with the `openai_live` build tag and also requires
+`SPICE_OPENAI_LIVE=1`, `OPENAI_API_KEY`, and an explicitly selected
+`OPENAI_MODEL`. Run `make live-acceptance` only when network access and account
+charges are authorized; see the README for PowerShell and POSIX invocations.

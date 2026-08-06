@@ -17,3 +17,9 @@ ambiguous or partial stream is never replayed automatically.
 
 Supported versions receive security fixes on the latest preview line until a
 stable support policy is published.
+
+The optional live acceptance is a real billable network operation. It is
+excluded from ordinary tests and requires both the `openai_live` build tag and
+the exact `SPICE_OPENAI_LIVE=1` environment switch. Its failure path discards
+upstream details rather than risk printing credentials. Never place a key in a
+command-line argument, source file, fixture, issue, or captured test artifact.

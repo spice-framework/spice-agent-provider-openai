@@ -58,12 +58,36 @@ keys, URLs, or raw provider objects.
 
 On a fresh clone, run `make tools-bootstrap` once to populate the exact product
 and tools module graphs without changing tracked module files. All ordinary
-quality targets remain offline. Run the offline suite with `make verify`. The
-live acceptance is opt-in:
+quality targets remain offline. Run the offline suite with `make verify`.
+
+## Opt-in live acceptance
+
+The live proof is excluded from ordinary test binaries by the `openai_live`
+build tag and remains disabled unless `SPICE_OPENAI_LIVE` is exactly `1`. Choose
+the model explicitly so account owners retain cost and compatibility control.
+For PowerShell:
+
+```powershell
+$env:SPICE_OPENAI_LIVE = "1"
+$env:OPENAI_API_KEY = "<secret>"
+$env:OPENAI_MODEL = "<supported-model>"
+make live-acceptance
+```
+
+For Linux and macOS shells:
 
 ```text
-SPICE_OPENAI_LIVE=1 OPENAI_API_KEY=<secret> OPENAI_MODEL=<model> go test -run TestLiveOpenAIResponse
+SPICE_OPENAI_LIVE=1 OPENAI_API_KEY='<secret>' OPENAI_MODEL='<supported-model>' make live-acceptance
 ```
+
+This command makes one real, billable Responses API streaming request over the
+network. Pricing, rate limits, data handling, and model availability are those
+of the selected OpenAI account and model. The proof sends one short text prompt,
+declares no tools, sets `store=false`, disables SDK retries, uses a 90-second
+client/context timeout, caps observation at 128 events and 4 KiB of text, and
+requires exact `spice-live-ok` text followed by terminal completion. It never
+prints the key or upstream provider details. Remove the environment variables
+from the shell after the run.
 
 See [the dependency review](docs/dependency-review.md),
 [security review](docs/security-review.md), and [support matrix](docs/support.md).
