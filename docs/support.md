@@ -5,7 +5,7 @@
 | Go | Exactly 1.26.5 for development and verification |
 | Spice core | `v0.1.0-preview.1` |
 | Spice toolchain | `v0.1.0-preview.1` |
-| Spice Agent | `v0.0.0-20260806183953-eaf19180429a` |
+| Spice Agent | `v0.0.0-20260806191411-841edd3d47ad` |
 | OpenAI Go SDK | `v3.50.0` |
 | Provider API | Exact `model.Provider` / `model.Stream` implementation |
 | Activation | Direct `New` or explicit `/autoconfigure` blank import fallback |

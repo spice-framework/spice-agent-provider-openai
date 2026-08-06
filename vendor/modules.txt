@@ -32,7 +32,7 @@ github.com/spice-framework/spice/security
 github.com/spice-framework/spice/starter
 github.com/spice-framework/spice/validation
 github.com/spice-framework/spice/web
-# github.com/spice-framework/spice-agent v0.0.0-20260806183953-eaf19180429a
+# github.com/spice-framework/spice-agent v0.0.0-20260806191411-841edd3d47ad
 ## explicit; go 1.26.0
 github.com/spice-framework/spice-agent/message
 github.com/spice-framework/spice-agent/model
