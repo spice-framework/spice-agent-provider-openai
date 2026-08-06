@@ -4,8 +4,8 @@ github.com/openai/openai-go/v3 v3.50.0 h1:CXn+C8a10oQiI5CMyMbCiykhITVhVxhdHX8j3C
 github.com/openai/openai-go/v3 v3.50.0/go.mod h1:Ogjo0gDct+Jm7yCqaCjLGQGygeV8xNfNHV1/yKvCji0=
 github.com/spice-framework/spice v0.1.0-preview.1.0.20260806200749-524424a04df0 h1:aEtIUj0tLvvgwKtOs1nOyAtxGumJIhcd5HdnrVJZ1hQ=
 github.com/spice-framework/spice v0.1.0-preview.1.0.20260806200749-524424a04df0/go.mod h1:dBZV5UZcbY6pzhfGNtvAwQIJ8YsFna+jf1SAlmukJfk=
-github.com/spice-framework/spice-agent v0.0.0-20260806204214-1f072842707a h1:g+AafVIq7RCzp8ZHANXC2yWSL9yKqq2oNGVZma3TiSo=
-github.com/spice-framework/spice-agent v0.0.0-20260806204214-1f072842707a/go.mod h1:pJO+ySRXrN40m5KKelXAsY3wUxhwS89VNpnLWJkOtZY=
+github.com/spice-framework/spice-agent v0.0.0-20260806220201-ba45c8884d65 h1:nfBYhYjQZFnwDewNsoAfuc3vdoxovRrxSMXXHRf4ggA=
+github.com/spice-framework/spice-agent v0.0.0-20260806220201-ba45c8884d65/go.mod h1:eOo0xWF5XF7P1CkA47YQA3jOEsUdWNqhDZzeMopyBWA=
 github.com/spice-framework/toolchain v0.1.0-preview.1.0.20260806203056-d0b9ac086bd6 h1:paTYw/o/6OsbNAvOWvjicOOqWyyt2Nd3vWdoPq8+BjA=
 github.com/spice-framework/toolchain v0.1.0-preview.1.0.20260806203056-d0b9ac086bd6/go.mod h1:5qwAMEFRzVhJTTD96xwQXMYFlUYwBWlwNNeOhZqqPeg=
 github.com/tidwall/gjson v1.14.2/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=

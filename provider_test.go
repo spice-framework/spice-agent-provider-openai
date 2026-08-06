@@ -96,6 +96,69 @@ func TestTranslateRequestUsesRequestModelAndPreservesConversation(t *testing.T) 
 	}
 }
 
+func TestTranslateRequestKeepsToolPolicyHostOnly(t *testing.T) {
+	t.Parallel()
+	schema := json.RawMessage(`{"type":"object","properties":{"path":{"type":"string"}}}`)
+	readOnly := mustToolDefinition(
+		t,
+		"filesystem",
+		"Access one file.",
+		schema,
+		tool.EffectReadOnly,
+		tool.ReplaySafe,
+		tool.CapabilityFilesystemRead,
+	)
+	mutating := mustToolDefinition(
+		t,
+		"filesystem",
+		"Access one file.",
+		schema,
+		tool.EffectMutating,
+		tool.ReplayIdempotent,
+		tool.CapabilityFilesystemWrite,
+	)
+	if readOnly.Fingerprint() == mutating.Fingerprint() {
+		t.Fatal("tool fingerprints ignored host policy metadata")
+	}
+	part := mustTextPart(t, "hello")
+	readRequest := requestWithDefinitions(t, "model", []tool.Definition{readOnly}, part)
+	writeRequest := requestWithDefinitions(t, "model", []tool.Definition{mutating}, part)
+	readParams, readAllowed, err := translateRequest(readRequest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeParams, writeAllowed, err := translateRequest(writeRequest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	readJSON, err := json.Marshal(readParams)
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeJSON, err := json.Marshal(writeParams)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(readJSON) != string(writeJSON) {
+		t.Fatalf("policy-only definition changes leaked into OpenAI request:\nread:  %s\nwrite: %s", readJSON, writeJSON)
+	}
+	if len(readAllowed) != 1 || len(writeAllowed) != 1 {
+		t.Fatalf("allowed tools = %#v and %#v", readAllowed, writeAllowed)
+	}
+	for _, forbidden := range []string{
+		string(tool.EffectReadOnly),
+		string(tool.EffectMutating),
+		string(tool.ReplaySafe),
+		string(tool.ReplayIdempotent),
+		string(tool.CapabilityFilesystemRead),
+		string(tool.CapabilityFilesystemWrite),
+	} {
+		if strings.Contains(string(readJSON), forbidden) || strings.Contains(string(writeJSON), forbidden) {
+			t.Fatalf("host policy metadata %q leaked into OpenAI request", forbidden)
+		}
+	}
+}
+
 func TestTranslateRequestRejectsUnsupportedOrMalformedValues(t *testing.T) {
 	t.Parallel()
 	extension, err := message.Extension("example.com/private", json.RawMessage(`{"value":true}`))
@@ -106,7 +169,13 @@ func TestTranslateRequestRejectsUnsupportedOrMalformedValues(t *testing.T) {
 	if _, _, err = translateRequest(withExtension); err == nil || !strings.Contains(err.Error(), "unsupported") {
 		t.Fatalf("translateRequest(extension) error = %v", err)
 	}
-	definition, err := tool.NewDefinition("bad", "Bad schema.", json.RawMessage(`true`))
+	definition, err := tool.NewDefinition(
+		"bad",
+		"Bad schema.",
+		json.RawMessage(`true`),
+		tool.EffectReadOnly,
+		tool.ReplaySafe,
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -779,7 +848,14 @@ func testRequest(t *testing.T, modelName string, includeTool bool) model.Request
 	}
 	var definitions []tool.Definition
 	if includeTool {
-		definition, definitionErr := tool.NewDefinition("read", "Read a file.", json.RawMessage(`{"type":"object","properties":{"path":{"type":"string"}},"required":["path"]}`), tool.CapabilityFilesystemRead)
+		definition, definitionErr := tool.NewDefinition(
+			"read",
+			"Read a file.",
+			json.RawMessage(`{"type":"object","properties":{"path":{"type":"string"}},"required":["path"]}`),
+			tool.EffectReadOnly,
+			tool.ReplaySafe,
+			tool.CapabilityFilesystemRead,
+		)
 		if definitionErr != nil {
 			t.Fatal(definitionErr)
 		}
@@ -827,7 +903,15 @@ func testConversationRequest(t *testing.T) model.Request {
 		mustMessage(t, "m2", message.RoleAssistant, text, call),
 		mustMessage(t, "m3", message.RoleTool, result),
 	}
-	definition := mustToolDefinition(t, "read", "Read a file.", json.RawMessage(`{"type":"object"}`), tool.CapabilityFilesystemRead)
+	definition := mustToolDefinition(
+		t,
+		"read",
+		"Read a file.",
+		json.RawMessage(`{"type":"object"}`),
+		tool.EffectReadOnly,
+		tool.ReplaySafe,
+		tool.CapabilityFilesystemRead,
+	)
 	request, err := model.NewRequest("operation-private", "authoritative-model", messages, []tool.Definition{definition})
 	if err != nil {
 		t.Fatal(err)
@@ -885,10 +969,12 @@ func mustToolDefinition(
 	t *testing.T,
 	name, description string,
 	schema json.RawMessage,
+	effect tool.Effect,
+	replaySafety tool.ReplaySafety,
 	capabilities ...tool.Capability,
 ) tool.Definition {
 	t.Helper()
-	definition, err := tool.NewDefinition(name, description, schema, capabilities...)
+	definition, err := tool.NewDefinition(name, description, schema, effect, replaySafety, capabilities...)
 	if err != nil {
 		t.Fatal(err)
 	}
