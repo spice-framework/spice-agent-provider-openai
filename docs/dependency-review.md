@@ -4,7 +4,7 @@
 
 Approved runtime dependencies are pinned to:
 
-- `github.com/spice-framework/spice-agent v0.0.0-20260806220201-ba45c8884d65`
+- `github.com/spice-framework/spice-agent v0.0.0-20260806225954-af79fc7fe4ad`
 - `github.com/openai/openai-go/v3 v3.50.0`
 
 The first supplies the exact provider-neutral contracts and bounds. The second
