@@ -96,3 +96,11 @@ from the shell after the run.
 
 See [the dependency review](docs/dependency-review.md),
 [security review](docs/security-review.md), and [support matrix](docs/support.md).
+
+## Release contract
+
+`spice-release.json` is inert, canonical metadata for the centrally authorized
+`go-module-v1` release profile. `make verify-release` runs the repository's
+complete local gate. The organization release authority independently binds
+the repository name, module path, exact preview version, required module graph,
+commit, and tag before it creates any artifact or release.

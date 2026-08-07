@@ -55,6 +55,9 @@ func run(ctx context.Context, root, mode string) error {
 	}
 	switch mode {
 	case "fast":
+		if err := checkReleaseMetadata(root); err != nil {
+			return err
+		}
 		return command(ctx, root, nil, "go", "test", "-shuffle=on", "-count=1", "./...")
 	case "fmt":
 		return format(ctx, root, true)
@@ -152,6 +155,9 @@ func bootstrapDownloadArguments(moduleFile string) []string {
 }
 
 func check(ctx context.Context, root string) error {
+	if err := checkReleaseMetadata(root); err != nil {
+		return err
+	}
 	for _, gate := range []func(context.Context, string) error{
 		formatCheck, moduleCheck, vet, tests,
 	} {
