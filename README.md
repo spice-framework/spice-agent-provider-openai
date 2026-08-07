@@ -1,5 +1,7 @@
 # Spice Agent OpenAI Provider
 
+Unified documentation: [spiceframework.dev/agent/providers/openai](https://spiceframework.dev/agent/providers/openai/).
+
 `spice-agent-provider-openai` is the explicit OpenAI Responses adapter for
 Spice Agent. It implements the exact `model.Provider` contract, owns no global
 state, and keeps model selection in each `model.Request`.
