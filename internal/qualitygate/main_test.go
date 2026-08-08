@@ -21,6 +21,26 @@ func TestNetworkAllowedOnlyForBootstrap(t *testing.T) {
 	}
 }
 
+func TestRepositoryPortabilityRequiresLFAndExplicitToolBootstrap(t *testing.T) {
+	t.Parallel()
+	root := t.TempDir()
+	writeGateFile(t, root, ".gitattributes", "* text=auto eol=lf\n*.pb -text\n*.png -text\n")
+	writeGateFile(t, root, ".github/workflows/ci.yml", `steps:
+  - run: go run ./internal/qualitygate -mode=tools-bootstrap
+  - run: go run ./internal/qualitygate -mode=verify
+`)
+	if err := checkRepositoryPortability(root); err != nil {
+		t.Fatal(err)
+	}
+
+	writeGateFile(t, root, ".github/workflows/ci.yml", `steps:
+  - run: go run ./internal/qualitygate -mode=verify
+`)
+	if err := checkRepositoryPortability(root); err == nil || !strings.Contains(err.Error(), "bootstrap") {
+		t.Fatalf("missing bootstrap error = %v", err)
+	}
+}
+
 func TestExactGoExecutable(t *testing.T) {
 	t.Parallel()
 	if goExecutableName("windows") != "go.exe" || goExecutableName("linux") != "go" {
@@ -184,6 +204,17 @@ func bootstrapFixture(t *testing.T, tools bool) string {
 		}
 	}
 	return root
+}
+
+func writeGateFile(t *testing.T, root, name, content string) {
+	t.Helper()
+	path := filepath.Join(root, filepath.FromSlash(name))
+	if err := os.MkdirAll(filepath.Dir(path), 0o750); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestTotalCoverage(t *testing.T) {

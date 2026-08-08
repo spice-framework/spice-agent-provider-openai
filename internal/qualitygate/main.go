@@ -55,7 +55,7 @@ func run(ctx context.Context, root, mode string) error {
 	}
 	switch mode {
 	case "fast":
-		if err := checkReleaseMetadata(root); err != nil {
+		if err := checkRepositoryMetadata(root); err != nil {
 			return err
 		}
 		return command(ctx, root, nil, "go", "test", "-shuffle=on", "-count=1", "./...")
@@ -155,7 +155,7 @@ func bootstrapDownloadArguments(moduleFile string) []string {
 }
 
 func check(ctx context.Context, root string) error {
-	if err := checkReleaseMetadata(root); err != nil {
+	if err := checkRepositoryMetadata(root); err != nil {
 		return err
 	}
 	for _, gate := range []func(context.Context, string) error{
@@ -164,6 +164,34 @@ func check(ctx context.Context, root string) error {
 		if err := gate(ctx, root); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func checkRepositoryMetadata(root string) error {
+	if err := checkReleaseMetadata(root); err != nil {
+		return err
+	}
+	return checkRepositoryPortability(root)
+}
+
+func checkRepositoryPortability(root string) error {
+	attributes, err := os.ReadFile(filepath.Join(root, ".gitattributes")) // #nosec G304 -- repository-owned path.
+	if err != nil {
+		return fmt.Errorf("read .gitattributes: %w", err)
+	}
+	if string(attributes) != "* text=auto eol=lf\n*.pb -text\n*.png -text\n" {
+		return errors.New(".gitattributes must enforce LF text and preserve binary protocol/image files")
+	}
+	workflow, err := os.ReadFile(filepath.Join(root, ".github", "workflows", "ci.yml")) // #nosec G304 -- repository-owned path.
+	if err != nil {
+		return fmt.Errorf("read CI workflow: %w", err)
+	}
+	text := strings.ReplaceAll(string(workflow), "\r\n", "\n")
+	bootstrap := strings.Index(text, "go run ./internal/qualitygate -mode=tools-bootstrap")
+	verify := strings.Index(text, "go run ./internal/qualitygate -mode=verify")
+	if bootstrap < 0 || verify <= bootstrap {
+		return errors.New("CI quality jobs must bootstrap pinned tools before offline verification")
 	}
 	return nil
 }

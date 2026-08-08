@@ -27,6 +27,11 @@ the only formatting target that mutates Go files. `make fast`, `make check`, and
 `make verify` force `GOPROXY=off`; a missing cache entry fails with an actionable
 prompt to run the explicit bootstrap.
 
+Clean checkouts preserve repository text as LF on every supported operating
+system. CI runs the explicit network-enabled bootstrap before the offline
+quality contract, so Windows module-file checks and empty hosted caches exercise
+the same deterministic contract as local development.
+
 The billable live provider proof is deliberately outside this contract. It is
 compiled only with the `openai_live` build tag and also requires
 `SPICE_OPENAI_LIVE=1`, `OPENAI_API_KEY`, and an explicitly selected
