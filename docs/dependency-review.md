@@ -4,7 +4,7 @@
 
 Approved runtime dependencies are pinned to:
 
-- `github.com/spice-framework/spice-agent v0.0.0-20260806225954-af79fc7fe4ad`
+- `github.com/spice-framework/spice-agent v0.1.0-preview.4`
 - `github.com/openai/openai-go/v3 v3.50.0`
 
 The first supplies the exact provider-neutral contracts and bounds. The second
@@ -20,8 +20,7 @@ provider. It constructs an instance-owned `responses.ResponseService` with
 explicit options and exposes only `model.Provider`. No raw SDK client, response,
 or stream crosses the public boundary.
 
-Spice core is pinned at
-`v0.1.0-preview.1.0.20260806200749-524424a04df0`, and the toolchain is pinned at
+Spice core is pinned at `v0.1.0-preview.2`, and the toolchain is pinned at
 `v0.1.0-preview.1.0.20260806203056-d0b9ac086bd6`. The compiler is authorized by
 the standard Go `tool` directive. All runtime and build modules participate in
 ordinary Go selection, checksums, vendoring, and offline verification; there is

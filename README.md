@@ -110,4 +110,7 @@ See [the dependency review](docs/dependency-review.md),
 `go-module-v1` release profile. `make verify-release` runs the repository's
 complete local gate. The organization release authority independently binds
 the repository name, module path, exact preview version, required module graph,
-commit, and tag before it creates any artifact or release.
+commit, and tag before it creates any artifact or release. Tag pushes call the
+single-job, secret-free reusable workflow at audited organization commit
+`0fcd43dc8b41fad56c231d0e136ad8c762276ed5`; repository verification rejects
+caller, module, permission, step, job, and secret drift before product tests.

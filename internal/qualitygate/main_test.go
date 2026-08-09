@@ -43,26 +43,40 @@ func TestRepositoryPortabilityRequiresLFAndExplicitToolBootstrap(t *testing.T) {
 
 func TestReleaseWorkflowRequiresExactKeylessBoundary(t *testing.T) {
 	t.Parallel()
-	root := t.TempDir()
-	writeGateFile(t, root, ".github/workflows/release.yml", `permissions: {}
-jobs:
-  release:
-    permissions:
-      contents: write
-      id-token: write
-      attestations: write
-      artifact-metadata: write
-    uses: spice-framework/.github/.github/workflows/go-module-release.yml@`+releaseWorkflowCommit+`
-    with:
-      module: `+modulePath+`
-      workflow_commit: `+releaseWorkflowCommit+`
-`)
-	if err := checkReleaseWorkflow(root); err != nil {
-		t.Fatal(err)
-	}
-	writeGateFile(t, root, ".github/workflows/release.yml", "secrets: inherit\n")
-	if err := checkReleaseWorkflow(root); err == nil {
-		t.Fatal("unsafe release workflow passed")
+	const immediatePriorWorkflowCommit = "26de6f4b78a64eedb21e15a2ffe8aa3fd579ef16"
+	valid := canonicalReleaseWorkflow()
+	for _, test := range []struct {
+		name    string
+		content string
+		omit    bool
+		valid   bool
+	}{
+		{name: "valid", content: valid, valid: true},
+		{name: "missing", omit: true},
+		{name: "immediate prior authority", content: strings.ReplaceAll(valid, releaseWorkflowCommit, immediatePriorWorkflowCommit)},
+		{name: "module drift", content: strings.Replace(valid, modulePath, "example.com/other", 1)},
+		{name: "workflow input drift", content: strings.Replace(valid, "workflow_commit: "+releaseWorkflowCommit, "workflow_commit: "+strings.Repeat("0", 40), 1)},
+		{name: "workflow-level write", content: strings.Replace(valid, "permissions: {}", "permissions:\n  contents: write", 1)},
+		{name: "excess job permission", content: strings.Replace(valid, "      contents: write", "      actions: write\n      contents: write", 1)},
+		{name: "missing job permission", content: strings.Replace(valid, "      artifact-metadata: write\n", "", 1)},
+		{name: "local step", content: strings.Replace(valid, "    uses:", "    steps:\n      - run: echo unsafe\n    uses:", 1)},
+		{name: "inherited secrets", content: valid + "    secrets: inherit\n"},
+		{name: "second job", content: valid + "  other:\n    uses: example.com/other.yml@main\n"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			root := t.TempDir()
+			if !test.omit {
+				writeGateFile(t, root, ".github/workflows/release.yml", test.content)
+			}
+			err := checkReleaseWorkflow(root)
+			if test.valid && err != nil {
+				t.Fatal(err)
+			}
+			if !test.valid && err == nil {
+				t.Fatal("unsafe release workflow passed")
+			}
+		})
 	}
 }
 

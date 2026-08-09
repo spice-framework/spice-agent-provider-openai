@@ -24,7 +24,7 @@ const (
 	modulePath            = "github.com/spice-framework/spice-agent-provider-openai"
 	requiredGo            = "go1.26.5"
 	minimumCoverage       = 85.0
-	releaseWorkflowCommit = "26de6f4b78a64eedb21e15a2ffe8aa3fd579ef16"
+	releaseWorkflowCommit = "0fcd43dc8b41fad56c231d0e136ad8c762276ed5"
 )
 
 func main() {
@@ -173,6 +173,9 @@ func checkRepositoryMetadata(root string) error {
 	if err := checkReleaseMetadata(root); err != nil {
 		return err
 	}
+	if err := checkDependencyMetadata(root); err != nil {
+		return err
+	}
 	if err := checkRepositoryPortability(root); err != nil {
 		return err
 	}
@@ -184,27 +187,31 @@ func checkReleaseWorkflow(root string) error {
 	if err != nil {
 		return fmt.Errorf("read release workflow: %w", err)
 	}
-	text := strings.ReplaceAll(string(content), "\r\n", "\n")
-	for _, required := range []string{
-		"permissions: {}",
-		"contents: write",
-		"id-token: write",
-		"attestations: write",
-		"artifact-metadata: write",
-		"uses: spice-framework/.github/.github/workflows/go-module-release.yml@" + releaseWorkflowCommit,
-		"module: " + modulePath,
-		"workflow_commit: " + releaseWorkflowCommit,
-	} {
-		if strings.Count(text, required) != 1 {
-			return fmt.Errorf("release workflow must contain exactly one %q", required)
-		}
-	}
-	for _, forbidden := range []string{"library-release.yml", "secrets:", "secrets: inherit", "SPICE_LIBRARY_RELEASE_SIGNING_KEY"} {
-		if strings.Contains(text, forbidden) {
-			return fmt.Errorf("release workflow contains forbidden %q", forbidden)
-		}
+	if strings.ReplaceAll(string(content), "\r\n", "\n") != canonicalReleaseWorkflow() {
+		return errors.New("release workflow must be the exact single-job, secret-free, permission-bounded reusable caller")
 	}
 	return nil
+}
+
+func canonicalReleaseWorkflow() string {
+	return "name: Release\n\n" +
+		"on:\n" +
+		"  push:\n" +
+		"    tags:\n" +
+		"      - \"v[0-9]*.[0-9]*.[0-9]*\"\n\n" +
+		"permissions: {}\n\n" +
+		"jobs:\n" +
+		"  release:\n" +
+		"    name: Keylessly attest and publish\n" +
+		"    permissions:\n" +
+		"      contents: write\n" +
+		"      id-token: write\n" +
+		"      attestations: write\n" +
+		"      artifact-metadata: write\n" +
+		"    uses: spice-framework/.github/.github/workflows/go-module-release.yml@" + releaseWorkflowCommit + "\n" +
+		"    with:\n" +
+		"      module: " + modulePath + "\n" +
+		"      workflow_commit: " + releaseWorkflowCommit + "\n"
 }
 
 func checkRepositoryPortability(root string) error {
