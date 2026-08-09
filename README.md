@@ -27,6 +27,13 @@ shows application-owned configuration. A request must choose its model through
 `model.Request.Model`. A zero timeout selects two minutes; configured request
 timeouts must be positive and no greater than thirty minutes.
 
+`BaseURL` must normally be an absolute HTTPS URL without user information.
+Plain HTTP is accepted only for the exact `localhost` host or a parsed IPv4 or
+IPv6 loopback literal, which supports local OpenAI-compatible test bridges
+without weakening remote endpoint validation. Loopback HTTP is plaintext: use
+it only with a trusted local process and local-only credentials. Lookalike
+names, wildcard addresses, and non-loopback hosts fail validation.
+
 Applications may opt into one replaceable fallback bean with an explicit blank
 import:
 

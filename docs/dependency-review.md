@@ -33,7 +33,10 @@ no custom dependency system.
   `OPENAI_*` variables.
 - API keys arrive only through explicit typed configuration and are secret
   marked. Configuration and error strings redact them.
-- Only absolute HTTPS endpoints without URL user information are accepted.
+- Remote endpoints require absolute HTTPS URLs without URL user information.
+  Plain HTTP is accepted only for exact `localhost` or a parsed loopback IP
+  literal to support explicit local test bridges; lookalike and wildcard hosts
+  are rejected.
 - Prompt/output content, tool arguments/results, headers, URLs, credentials,
   raw response bodies, and raw SDK objects are excluded from metadata.
 - Construction performs no network operation and starts no goroutine.

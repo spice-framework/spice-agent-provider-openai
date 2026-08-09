@@ -10,7 +10,7 @@
 | Provider API | Exact `model.Provider` / `model.Stream` implementation |
 | Activation | Direct `New` or explicit `/autoconfigure` blank import fallback |
 | Operating systems | Windows, Linux, and macOS |
-| Network | HTTPS OpenAI-compatible Responses endpoint; no construction-time network activity |
+| Network | HTTPS OpenAI-compatible Responses endpoint, plus explicitly configured loopback-only HTTP for local test bridges; no construction-time network activity |
 | Tests | Offline scripted/fake-TLS tests by default; explicitly enabled live acceptance |
 | Request timeout | Two-minute default; positive values through thirty minutes |
 | Stream concurrency | One `Recv` caller may race with `Close`; concurrent `Recv` calls unsupported |

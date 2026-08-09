@@ -1,14 +1,15 @@
 # Security review
 
 The trust boundary begins at application-owned configuration and request data
-and ends at the configured HTTPS Responses endpoint. This trusted native module
-does not claim to sandbox network activity.
+and ends at the configured Responses endpoint. Remote endpoints require HTTPS;
+plain HTTP is limited to a local loopback test bridge. This trusted native
+module does not claim to sandbox network activity.
 
 | Risk | Control and evidence |
 |---|---|
 | Ambient credential capture | Only explicit `Config.APIKey` is accepted; the adapter does not use SDK environment defaults. |
 | Credential or content disclosure | Secret tags, redacted `Config.String`, typed bounded errors, safe causes, metadata allowlist, and adversarial leak tests. |
-| Endpoint credential exfiltration | Base URL must be absolute HTTPS with a host and no URL user information. |
+| Endpoint credential exfiltration | Base URL must be absolute HTTPS with a host and no URL user information. HTTP is accepted only for exact `localhost` or a parsed loopback IP literal; lookalike DNS names, wildcard addresses, and remote hosts fail closed. |
 | Hidden provider data retention | Every request sets `store=false`; the provider exposes no raw SDK accessor. |
 | Duplicate side effects | A hashed operation idempotency key protects startup attempts; no provider retry occurs after a stream is returned. |
 | Partial tool execution | Only finalized function calls in `response.completed` become Spice calls; malformed, duplicate, undeclared, and hosted calls fail closed. |
@@ -27,3 +28,9 @@ application code. A transport that ignores context cancellation and close can
 prevent cooperative shutdown; the provider does not claim forcible containment.
 Provider metadata is discarded by the engine unless the application explicitly
 allowlists `openaiprovider.MetadataNamespace`.
+
+Loopback HTTP provides no transport confidentiality or peer authentication.
+It is intended only for a trusted local OpenAI-compatible test bridge with
+local-only credentials. The conventional `localhost` alias still depends on
+the operating system's host resolution, so applications requiring a stricter
+boundary should configure an IP loopback literal or HTTPS.

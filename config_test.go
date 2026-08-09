@@ -18,6 +18,25 @@ func TestNewConstructsWithoutNetworkAndNormalizesDefaults(t *testing.T) {
 	}
 }
 
+func TestNewAllowsLoopbackHTTPForLocalFreeBridges(t *testing.T) {
+	t.Parallel()
+	for _, baseURL := range []string{
+		"http://127.0.0.1:8787/v1",
+		"http://127.20.30.40:8787/v1",
+		"http://localhost:8787/v1",
+		"http://LOCALHOST:8787/v1",
+		"http://[::1]:8787/v1",
+		"http://[::ffff:127.0.0.1]:8787/v1",
+	} {
+		t.Run(baseURL, func(t *testing.T) {
+			t.Parallel()
+			if _, err := New(Config{APIKey: "local-free", BaseURL: baseURL}); err != nil {
+				t.Fatalf("New(%q) error = %v, want loopback HTTP accepted", baseURL, err)
+			}
+		})
+	}
+}
+
 func TestNewRejectsInvalidConfigurationWithoutLeakingSecret(t *testing.T) {
 	t.Parallel()
 	tests := []struct {
@@ -26,7 +45,12 @@ func TestNewRejectsInvalidConfigurationWithoutLeakingSecret(t *testing.T) {
 		want   string
 	}{
 		{name: "key", config: Config{}, want: "API key is required"},
-		{name: "scheme", config: Config{APIKey: "secret", BaseURL: "http://api.example.test"}, want: "absolute HTTPS"},
+		{name: "remote HTTP", config: Config{APIKey: "secret", BaseURL: "http://api.example.test"}, want: "absolute HTTPS"},
+		{name: "unspecified IPv4 HTTP", config: Config{APIKey: "secret", BaseURL: "http://0.0.0.0:8787/v1"}, want: "absolute HTTPS"},
+		{name: "unspecified IPv6 HTTP", config: Config{APIKey: "secret", BaseURL: "http://[::]:8787/v1"}, want: "absolute HTTPS"},
+		{name: "localhost suffix HTTP", config: Config{APIKey: "secret", BaseURL: "http://localhost.example.test/v1"}, want: "absolute HTTPS"},
+		{name: "loopback suffix HTTP", config: Config{APIKey: "secret", BaseURL: "http://127.0.0.1.example.test/v1"}, want: "absolute HTTPS"},
+		{name: "relative", config: Config{APIKey: "secret", BaseURL: "/v1"}, want: "absolute HTTPS"},
 		{name: "userinfo", config: Config{APIKey: "secret", BaseURL: "https://user@api.example.test"}, want: "without user information"},
 		{name: "timeout negative", config: Config{APIKey: "secret", Timeout: -time.Second}, want: "timeout must be positive"},
 		{name: "timeout over maximum", config: Config{APIKey: "secret", Timeout: maximumTimeout + time.Nanosecond}, want: "no greater than 30m0s"},
