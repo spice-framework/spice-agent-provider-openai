@@ -52,3 +52,8 @@ compiled only with the `openai_live` build tag and also requires
 `SPICE_OPENAI_LIVE=1`, `OPENAI_API_KEY`, and an explicitly selected
 `OPENAI_MODEL`. Run `make live-acceptance` only when network access and account
 charges are authorized; see the README for PowerShell and POSIX invocations.
+
+The provisional offline translation and stream benchmarks are documented in
+[`benchmarks.md`](benchmarks.md). They are diagnostic evidence, not fixed
+quality-gate thresholds, and use only the committed vendor graph and in-memory
+scripted response source.

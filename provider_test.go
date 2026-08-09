@@ -816,11 +816,11 @@ func testClient(source responseSource) *Client {
 	}}
 }
 
-func streamEvent(t *testing.T, value string) responses.ResponseStreamEventUnion {
-	t.Helper()
+func streamEvent(tb testing.TB, value string) responses.ResponseStreamEventUnion {
+	tb.Helper()
 	var event responses.ResponseStreamEventUnion
 	if err := json.Unmarshal([]byte(value), &event); err != nil {
-		t.Fatal(err)
+		tb.Fatal(err)
 	}
 	return event
 }
