@@ -17,6 +17,8 @@ not an older `go` that may appear first on `PATH`.
 
 - `make fast` checks the exact Go version and runs affected repository tests.
 - `make check` adds goimports/gofumpt, tidy diff, vet, and shuffled tests.
+- `make benchmark` runs the four adopted deterministic provider benchmarks as
+  five fixed 500-iteration, single-CPU samples with the offline vendor graph.
 - `make verify` adds allowlisted lint, NilAway, gosec, govulncheck, race tests,
   85% product coverage, reproducible vendor comparison, and vendor-offline
   tests/builds.
@@ -54,6 +56,6 @@ compiled only with the `openai_live` build tag and also requires
 charges are authorized; see the README for PowerShell and POSIX invocations.
 
 The provisional offline translation and stream benchmarks are documented in
-[`benchmarks.md`](benchmarks.md). They are diagnostic evidence, not fixed
-quality-gate thresholds, and use only the committed vendor graph and in-memory
-scripted response source.
+[`benchmarks.md`](benchmarks.md). They are diagnostic evidence produced by the
+repository-owned benchmark gate, not fixed quality-gate thresholds, and use
+only the committed vendor graph and in-memory scripted response source.

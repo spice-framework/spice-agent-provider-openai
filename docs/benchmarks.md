@@ -12,14 +12,16 @@ provider's primary translation costs:
 - `BenchmarkRecvCanceled` measures the already-cancelled receive path without
   constructing a transport or goroutine.
 
-Run the suite from a clean repository with the committed vendor graph:
+Run the suite through the repository-owned offline gate:
 
 ```text
-GOWORK=off GOPROXY=off go test -mod=vendor -run '^$' -bench '^Benchmark' -benchmem -count=5 .
+make benchmark
 ```
 
-In PowerShell, set `$env:GOWORK = 'off'` and `$env:GOPROXY = 'off'` before the
-same `go test` command.
+The gate selects exactly these four benchmarks, runs five fixed 500-iteration
+samples with `-cpu=1`, records allocations, forces `GOWORK=off`, and disables
+the proxy and checksum database while using the committed vendor graph.
+Missing dependencies therefore fail instead of causing a hidden download.
 The fixtures use only pre-decoded Responses events and the repository's
 in-memory scripted source. They perform no HTTP requests, read no environment
 variables, and need no OpenAI credentials.
@@ -53,3 +55,6 @@ The scripted stream result intentionally includes operation-context creation,
 the bounded pump goroutine, channel handoff, and cooperative close. Scheduler
 variance makes that benchmark particularly unsuitable for a fixed threshold
 until several supported-platform histories exist.
+
+Future observations use `make benchmark`; the historical table above predates
+the repository-owned command and remains descriptive evidence only.
