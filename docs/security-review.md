@@ -17,9 +17,9 @@ module does not claim to sandbox network activity.
 | Unbounded wait or goroutine accumulation | Caller operation context, two-minute default and thirty-minute maximum configured timeout, one bounded stream pump, per-`Recv` context selection, and joined cooperative close. |
 | Protocol/transport leakage | Startup and receive errors are typed separately; public text is generic, safe metadata is allowlisted, and raw upstream failures are not exposed. |
 | Global cross-tenant state | One client/service/HTTP transport per injected provider bean; no registry or package-level mutable client. |
-| Accidental live traffic | Unit/integration tests use scripted sources or fake TLS HTTP. Live acceptance is excluded without the `openai_live` build tag and also requires an exact environment opt-in, credentials, and explicit model. Ordinary gates remain offline. |
-| Live acceptance secret leakage | The live test never prints configuration or upstream error details, configuration errors are value-free, and unit tests prove unconditional error redaction. |
-| Unbounded live acceptance cost or output | One short request, no tools, `store=false`, zero SDK retries, a 90-second timeout, an explicit model, 128 observed events, and 4 KiB accumulated text. |
+| Accidental live traffic | Unit/integration tests use scripted sources or fake TLS HTTP. Live acceptance is excluded without the `openai_live` build tag and also requires one exact opt-in, credentials, explicit HTTPS base URL, and explicit model. The two opt-ins are mutually exclusive and neither has a default-network fallback. Ordinary gates remain offline. |
+| Live acceptance secret leakage | The live test never prints configuration, response text, or upstream error details; configuration errors are value-free, and unit tests prove unconditional error redaction. Committed evidence excludes prompts, output, tokens, keys, and endpoint URLs. |
+| Unbounded live acceptance cost or output | One model request, no tools, `store=false`, zero SDK retries, a 90-second timeout, a 32-token provider cap, 128 observed events, and 4 KiB accumulated text. OpenRouter mode additionally requires the exact `:free` suffix and zero prompt/completion catalog prices before inference. |
 
 Residual trust is explicit: application code supplies the HTTP client and
 endpoint policy, and the OpenAI SDK performs the HTTPS exchange. A custom

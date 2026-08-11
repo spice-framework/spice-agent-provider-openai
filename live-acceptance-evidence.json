@@ -1,0 +1,10 @@
+{
+  "schema": "spice.agent.provider.live-acceptance/v1alpha1",
+  "status": "responses-compatible-provider-proven",
+  "endpoint_host_class": "openrouter",
+  "model": "poolside/laguna-s-2.1:free",
+  "inference_request_count": 1,
+  "maximum_elapsed_milliseconds": 90000,
+  "result_sha256": "969f379b637f02b0d849fef40b3de43c18fe1d966c15bddc3f91e93bfe94fdc6",
+  "catalog_cost_zero": true
+}

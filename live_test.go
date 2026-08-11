@@ -5,7 +5,9 @@ package openaiprovider
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -14,19 +16,30 @@ import (
 	"github.com/spice-framework/spice-agent/model"
 )
 
-func TestLiveOpenAIResponse(t *testing.T) {
+func TestLiveResponsesCompatibleProvider(t *testing.T) {
 	settings, enabled, err := liveAcceptanceSettingsFrom(os.Getenv)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !enabled {
-		t.Skip("set SPICE_OPENAI_LIVE=1 to run the opt-in live acceptance test")
+		t.Skip("set SPICE_RESPONSES_LIVE=1 or SPICE_OPENAI_LIVE=1 to run the opt-in live acceptance test")
+	}
+	ctx, cancel := context.WithTimeout(t.Context(), liveAcceptanceTimeout)
+	defer cancel()
+	httpClient := &http.Client{Timeout: liveAcceptanceTimeout}
+	if settings.zeroCostOnly {
+		if err := preflightOpenRouterFreeRoute(ctx, httpClient, settings.model); err != nil {
+			t.Fatalf("preflight exact free OpenRouter route: %v", redactedLiveError(err))
+		}
 	}
 	client, err := New(Config{
-		APIKey: settings.apiKey, Timeout: liveAcceptanceTimeout, MaxRetries: 0,
-	})
+		APIKey: settings.apiKey, BaseURL: settings.baseURL, Timeout: liveAcceptanceTimeout, MaxRetries: 0,
+	}, WithHTTPClient(httpClient))
 	if err != nil {
-		t.Fatalf("construct live OpenAI client: %v", redactedLiveError(err))
+		t.Fatalf("construct live provider client: %v", redactedLiveError(err))
+	}
+	if err := applyLiveRequestBounds(client); err != nil {
+		t.Fatalf("bound live provider request: %v", redactedLiveError(err))
 	}
 	part, err := message.Text(liveAcceptancePrompt)
 	if err != nil {
@@ -44,15 +57,13 @@ func TestLiveOpenAIResponse(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ctx, cancel := context.WithTimeout(t.Context(), liveAcceptanceTimeout)
-	defer cancel()
 	stream, err := client.Stream(ctx, request)
 	if err != nil {
-		t.Fatalf("start live OpenAI stream: %v", redactedLiveError(err))
+		t.Fatalf("start live provider stream: %v", redactedLiveError(err))
 	}
 	defer func() {
 		if closeErr := stream.Close(); closeErr != nil {
-			t.Errorf("close live OpenAI stream: %v", redactedLiveError(closeErr))
+			t.Errorf("close live provider stream: %v", redactedLiveError(closeErr))
 		}
 	}()
 	var text strings.Builder
@@ -64,21 +75,21 @@ func TestLiveOpenAIResponse(t *testing.T) {
 			break
 		}
 		if receiveErr != nil {
-			t.Fatalf("receive live OpenAI stream: %v", redactedLiveError(receiveErr))
+			t.Fatalf("receive live provider stream: %v", redactedLiveError(receiveErr))
 		}
 		if completed {
-			t.Fatal("live OpenAI stream emitted an event after terminal completion")
+			t.Fatal("live provider stream emitted an event after terminal completion")
 		}
 		events++
 		if events > maximumLiveAcceptanceEvents {
-			t.Fatalf("live OpenAI stream exceeded %d events", maximumLiveAcceptanceEvents)
+			t.Fatalf("live provider stream exceeded %d events", maximumLiveAcceptanceEvents)
 		}
 		if validationErr := event.Validate(); validationErr != nil {
-			t.Fatalf("live OpenAI stream returned an invalid event: %v", validationErr)
+			t.Fatalf("live provider stream returned an invalid event: %v", validationErr)
 		}
 		if delta, ok := event.Text(); ok {
 			if text.Len()+len(delta) > maximumLiveAcceptanceTextBytes {
-				t.Fatalf("live OpenAI text exceeded %d bytes", maximumLiveAcceptanceTextBytes)
+				t.Fatalf("live provider text exceeded %d bytes", maximumLiveAcceptanceTextBytes)
 			}
 			text.WriteString(delta)
 		}
@@ -90,9 +101,17 @@ func TestLiveOpenAIResponse(t *testing.T) {
 		}
 	}
 	if !completed {
-		t.Fatal("live OpenAI stream ended without terminal completion")
+		t.Fatal("live provider stream ended without terminal completion")
 	}
 	if strings.TrimSpace(text.String()) != liveAcceptanceMarker {
-		t.Fatal("live OpenAI response text did not exactly match the expected marker")
+		t.Fatal("live provider response text did not exactly match the expected marker")
 	}
+	fmt.Printf(
+		"live-acceptance endpoint_host_class=%s model=%s inference_request_count=1 maximum_elapsed_milliseconds=%d result_sha256=%s catalog_cost_zero=%t\n",
+		settings.hostClass,
+		settings.model,
+		liveAcceptanceTimeout.Milliseconds(),
+		liveAcceptanceResultDigest(),
+		settings.zeroCostOnly,
+	)
 }

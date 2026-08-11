@@ -21,4 +21,4 @@ verify:
 verify-release: verify
 
 live-acceptance:
-	go test -tags=openai_live -run '^TestLiveOpenAIResponse$$' -count=1 .
+	go test -tags=openai_live -run '^TestLiveResponsesCompatibleProvider$$' -count=1 .

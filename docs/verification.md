@@ -49,11 +49,16 @@ system. CI runs the explicit network-enabled bootstrap before the offline
 quality contract, so Windows module-file checks and empty hosted caches exercise
 the same deterministic contract as local development.
 
-The billable live provider proof is deliberately outside this contract. It is
-compiled only with the `openai_live` build tag and also requires
-`SPICE_OPENAI_LIVE=1`, `OPENAI_API_KEY`, and an explicitly selected
-`OPENAI_MODEL`. Run `make live-acceptance` only when network access and account
-charges are authorized; see the README for PowerShell and POSIX invocations.
+The live provider proof is deliberately outside this contract. It is compiled
+only with the `openai_live` build tag. Canonical compatible-provider mode also
+requires `SPICE_RESPONSES_LIVE=1`, `OPENAI_API_KEY`, an explicit
+`OPENAI_BASE_URL`, and an explicit `OPENAI_MODEL`; it has no default endpoint
+fallback. OpenRouter mode accepts only an exact `:free` model after a bounded
+public-catalog zero-price preflight. Optional first-party evidence uses the
+mutually exclusive `SPICE_OPENAI_LIVE=1` mode and the exact explicit OpenAI base
+URL. Run `make live-acceptance` only when network access and the selected
+provider's account terms are authorized; see the README for invocations and the
+sanitized evidence boundary.
 
 The provisional offline translation and stream benchmarks are documented in
 [`benchmarks.md`](benchmarks.md). They are diagnostic evidence produced by the

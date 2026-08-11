@@ -7,11 +7,15 @@ a second phase numbering system.
 The current contract is a complete OpenAI Responses implementation of
 `model.Provider`: bounded request translation, streamed text, finalized tool
 calls, usage, completion metadata, cancellation, typed redacted failures,
-offline fake-HTTP coverage, and an opt-in live acceptance.
+offline fake-HTTP coverage, and a completed opt-in live
+Responses-compatible-provider acceptance.
 
 The live acceptance is deliberately double-gated by a build tag and exact
-environment opt-in. It proves the real bounded Responses streaming path, exact
-text, and terminal completion without adding network access to ordinary gates.
+environment opt-in. It requires an explicit endpoint and proves the real
+bounded Responses streaming path, exact text, usage, and terminal completion
+without adding network access to ordinary gates. The recorded OpenRouter proof
+uses an exact zero-price `:free` route and does not claim first-party OpenAI
+service behavior; an explicit first-party OpenAI mode remains optional.
 
 Before a stable release, changes remain focused on compatibility evidence,
 additional provider fixtures, and the signed architecture-proof distribution.

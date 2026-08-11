@@ -60,5 +60,8 @@ partial streams are therefore never replayed by this module.
 Provider metadata is optional, bounded, namespaced, and application-allowlisted.
 The only permitted fields are response ID, request ID, model, status, service
 tier, and HTTP status. Usage remains provider-neutral core data. Live testing is
-opt-in and never prints prompts, outputs, keys, authorization headers, or raw
-provider errors.
+opt-in and never prints prompts, outputs, keys, authorization headers, raw
+provider errors, or endpoint URLs. The recorded compatible-provider evidence
+contains only a host class, exact model identifier, request count, elapsed
+bound, result digest, and zero-cost catalog fact; it does not claim first-party
+OpenAI service behavior.

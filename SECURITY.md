@@ -21,8 +21,13 @@ stream is never replayed automatically.
 Supported versions receive security fixes on the latest preview line until a
 stable support policy is published.
 
-The optional live acceptance is a real billable network operation. It is
-excluded from ordinary tests and requires both the `openai_live` build tag and
-the exact `SPICE_OPENAI_LIVE=1` environment switch. Its failure path discards
-upstream details rather than risk printing credentials. Never place a key in a
-command-line argument, source file, fixture, issue, or captured test artifact.
+The optional live acceptance is a real network operation. It is excluded from
+ordinary tests and requires both the `openai_live` build tag and one exact,
+mutually exclusive opt-in. Canonical `SPICE_RESPONSES_LIVE=1` mode requires an
+explicit compatible HTTPS base URL and model; OpenRouter additionally requires
+an exact `:free` route whose public catalog reports zero prompt and completion
+prices. Optional `SPICE_OPENAI_LIVE=1` mode accepts only the exact explicit
+first-party OpenAI base URL and may be billable. The failure path discards
+upstream details rather than risk printing credentials or response content.
+Never place a key in a command-line argument, source file, fixture, issue, or
+captured test artifact.

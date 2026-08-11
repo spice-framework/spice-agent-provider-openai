@@ -75,31 +75,47 @@ quality targets remain offline. Run the offline suite with `make verify`.
 ## Opt-in live acceptance
 
 The live proof is excluded from ordinary test binaries by the `openai_live`
-build tag and remains disabled unless `SPICE_OPENAI_LIVE` is exactly `1`. Choose
-the model explicitly so account owners retain cost and compatibility control.
-For PowerShell:
+build tag. Its canonical mode is disabled unless `SPICE_RESPONSES_LIVE` is
+exactly `1`, and it requires an explicit API key, Responses-compatible base URL,
+and model. A missing base URL is an error after opt-in; the test never falls back
+to a default network endpoint.
+
+The completed zero-cost proof used OpenRouter's OpenAI-compatible Responses API
+and exact model `poolside/laguna-s-2.1:free`. For PowerShell:
 
 ```powershell
-$env:SPICE_OPENAI_LIVE = "1"
-$env:OPENAI_API_KEY = "<secret>"
-$env:OPENAI_MODEL = "<supported-model>"
+$env:SPICE_RESPONSES_LIVE = "1"
+$env:OPENAI_API_KEY = "<OpenRouter secret>"
+$env:OPENAI_BASE_URL = "https://openrouter.ai/api/v1"
+$env:OPENAI_MODEL = "poolside/laguna-s-2.1:free"
 make live-acceptance
 ```
 
 For Linux and macOS shells:
 
 ```text
-SPICE_OPENAI_LIVE=1 OPENAI_API_KEY='<secret>' OPENAI_MODEL='<supported-model>' make live-acceptance
+SPICE_RESPONSES_LIVE=1 OPENAI_API_KEY='<OpenRouter secret>' OPENAI_BASE_URL='https://openrouter.ai/api/v1' OPENAI_MODEL='poolside/laguna-s-2.1:free' make live-acceptance
 ```
 
-This command makes one real, billable Responses API streaming request over the
-network. Pricing, rate limits, data handling, and model availability are those
-of the selected OpenAI account and model. The proof sends one short text prompt,
-declares no tools, sets `store=false`, disables SDK retries, uses a 90-second
-client/context timeout, caps observation at 128 events and 4 KiB of text, and
-requires exact `spice-live-ok` text followed by terminal completion. It never
-prints the key or upstream provider details. Remove the environment variables
-from the shell after the run.
+OpenRouter mode first makes an unauthenticated, bounded catalog request and
+requires the exact `:free` route to advertise zero prompt and completion prices.
+It then makes exactly one model request. The proof sends one short fixed prompt,
+declares no tools, sets `store=false`, disables SDK retries, caps provider output
+at 32 tokens, uses one 90-second context, caps observation at 128 events and 4
+KiB of text, and requires exact `spice-live-ok` text, usage, and terminal
+completion. No prompt, output, token count, key, URL, transcript, or upstream
+error is persisted. The committed
+[`live-acceptance-evidence.json`](live-acceptance-evidence.json) contains only
+the endpoint host class, exact model, one-request count, elapsed bound, expected
+result hash, and zero-cost catalog fact.
+
+This is evidence that the adapter works against a live OpenAI
+Responses-compatible provider. It is not a claim about the first-party OpenAI
+service. Optional first-party evidence remains available with the mutually
+exclusive `SPICE_OPENAI_LIVE=1` opt-in, but it now also requires the explicit
+base URL `https://api.openai.com/v1`, an OpenAI key, and an explicitly selected
+model. That operation may be billable under the selected OpenAI account. Remove
+all live environment variables after either run.
 
 See [the dependency review](docs/dependency-review.md),
 [security review](docs/security-review.md), and [support matrix](docs/support.md).
