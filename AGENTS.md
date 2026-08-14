@@ -4,7 +4,7 @@ This repository owns the independently versioned OpenAI Responses integration
 for Spice Agent. Work directly on local `main` in bounded commits. Fetch before
 editing and immediately before pushing; never overwrite unexpected remote work.
 
-Go 1.26.5 is mandatory. Preserve caller-owned contexts, deterministic event
+Go 1.26.6 is mandatory. Preserve caller-owned contexts, deterministic event
 translation, bounded metadata, secret redaction, conservative retry semantics,
 explicit `/autoconfigure` activation, and instance ownership. Construction must
 never perform network I/O or read ambient credentials. Product packages must not

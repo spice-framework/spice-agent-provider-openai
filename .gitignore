@@ -1,3 +1,4 @@
 /.tmp/
 /coverage.out
 /dist/
+/.spice/cache/

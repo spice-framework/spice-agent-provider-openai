@@ -15,8 +15,8 @@ import (
 
 const (
 	productGoVersion    = "1.26.0"
-	productToolchain    = "go1.26.5"
-	spiceVersion        = "v0.1.0-preview.2"
+	productToolchain    = "go1.26.6"
+	spiceVersion        = "v0.1.0-preview.4.0.20260814014712-5f535e696300"
 	spiceAgentVersion   = "v0.1.0-preview.4"
 	toolchainVersion    = "v0.1.0-preview.1.0.20260806203056-d0b9ac086bd6"
 	openAIGoVersion     = "v3.50.0"

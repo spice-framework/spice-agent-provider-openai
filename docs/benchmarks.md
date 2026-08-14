@@ -36,7 +36,7 @@ history plus an explicit regression policy.
 ## Initial provisional baseline
 
 The benchmark-introduction tree was sampled three times on 2026-08-09 with Go
-1.26.5 on Windows/amd64 and an AMD Ryzen 9 5900X. The table records the median
+1.26.6 on Windows/amd64 and an AMD Ryzen 9 5900X. The table records the median
 sample; it is evidence that the benchmark is executable, not a release budget.
 The tree was based on commit `a520cec19b2ee572ea1044c8335e7479d70650f3`;
 the sampled `provider.go` SHA-256 was

@@ -6,13 +6,13 @@ On a fresh clone, explicitly populate the exact product and tools module graphs:
 make tools-bootstrap
 ```
 
-This is the only network-enabled quality mode. It requires Go 1.26.5, downloads
+This is the only network-enabled quality mode. It requires Go 1.26.6, downloads
 `all` from private temporary copies of both `go.mod`/`go.sum` pairs, disables Go
 authentication, and permits only the public checksum database and module proxy.
 It verifies that the repository is byte-for-byte unchanged even when a download
 fails. A repository without a tools module is valid. No application API keys,
 tokens, passwords, or secrets are passed to the Go subprocess.
-Every child Go command uses the selected Go 1.26.5 binary from `runtime.GOROOT`,
+Every child Go command uses the selected Go 1.26.6 binary from `runtime.GOROOT`,
 not an older `go` that may appear first on `PATH`.
 
 - `make fast` checks the exact Go version and runs affected repository tests.

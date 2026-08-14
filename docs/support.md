@@ -2,8 +2,8 @@
 
 | Contract | Supported value |
 |---|---|
-| Go | Exactly 1.26.5 for development and verification |
-| Spice core | `v0.1.0-preview.2` |
+| Go | Exactly 1.26.6 for development and verification |
+| Spice core | `v0.1.0-preview.4.0.20260814014712-5f535e696300` |
 | Spice toolchain | `v0.1.0-preview.1.0.20260806203056-d0b9ac086bd6` |
 | Spice Agent | `v0.1.0-preview.4` |
 | OpenAI Go SDK | `v3.50.0` |

@@ -10,7 +10,7 @@ func Manifest() spicestarter.Manifest {
 		Version:   "0.1.0-dev",
 		Module:    "github.com/spice-framework/spice-agent-provider-openai",
 		SpiceAPI:  spicestarter.APIVersion,
-		MinimumGo: "1.26.5",
+		MinimumGo: "1.26.6",
 		License:   "Apache-2.0",
 		Review:    "docs/dependency-review.md",
 		Activation: spicestarter.Activation{

@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "kind": "starter",
+  "name": "spice-agent-provider-openai",
+  "module": "github.com/spice-framework/spice-agent-provider-openai",
+  "spiceCompatibility": {
+    "minimum": "v0.1.0-preview.4.0.20260814014712-5f535e696300",
+    "current": "v0.1.0-preview.4.0.20260814014712-5f535e696300"
+  },
+  "capabilities": [
+    "agent.model.openai"
+  ],
+  "autoConfigurationPackages": [
+    "github.com/spice-framework/spice-agent-provider-openai"
+  ],
+  "compilerTools": [
+    "github.com/spice-framework/toolchain"
+  ],
+  "publicPackages": [
+    "github.com/spice-framework/spice-agent-provider-openai",
+    "github.com/spice-framework/spice-agent-provider-openai/autoconfigure"
+  ],
+  "documentation": [
+    "README.md"
+  ]
+}

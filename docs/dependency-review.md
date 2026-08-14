@@ -20,7 +20,7 @@ provider. It constructs an instance-owned `responses.ResponseService` with
 explicit options and exposes only `model.Provider`. No raw SDK client, response,
 or stream crosses the public boundary.
 
-Spice core is pinned at `v0.1.0-preview.2`, and the toolchain is pinned at
+Spice core is pinned at `v0.1.0-preview.4.0.20260814014712-5f535e696300`, and the toolchain is pinned at
 `v0.1.0-preview.1.0.20260806203056-d0b9ac086bd6`. The compiler is authorized by
 the standard Go `tool` directive. All runtime and build modules participate in
 ordinary Go selection, checksums, vendoring, and offline verification; there is

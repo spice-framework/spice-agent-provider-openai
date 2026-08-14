@@ -22,7 +22,7 @@ import (
 
 const (
 	modulePath            = "github.com/spice-framework/spice-agent-provider-openai"
-	requiredGo            = "go1.26.5"
+	requiredGo            = "go1.26.6"
 	minimumCoverage       = 85.0
 	releaseWorkflowCommit = "0fcd43dc8b41fad56c231d0e136ad8c762276ed5"
 )

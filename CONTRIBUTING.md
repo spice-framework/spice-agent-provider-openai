@@ -1,6 +1,6 @@
 # Contributing
 
-Use Go 1.26.5 and work in a clean checkout. Keep changes small, preserve the
+Use Go 1.26.6 and work in a clean checkout. Keep changes small, preserve the
 dependency direction in `ARCHITECTURE.md`, and add tests for success, invalid
 configuration, cancellation, partial streams, and redaction when relevant.
 
