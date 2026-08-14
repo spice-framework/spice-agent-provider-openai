@@ -8,7 +8,7 @@ require (
 	github.com/openai/openai-go/v3 v3.50.0
 	github.com/spice-framework/spice v0.1.0-preview.4.0.20260814014712-5f535e696300
 	github.com/spice-framework/spice-agent v0.1.0-preview.4
-	golang.org/x/mod v0.38.0
+	golang.org/x/mod v0.39.0
 )
 
 require (
