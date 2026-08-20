@@ -8,7 +8,7 @@ require (
 	github.com/openai/openai-go/v3 v3.50.0
 	github.com/spice-framework/spice v0.1.0-preview.4.0.20260814014712-5f535e696300
 	github.com/spice-framework/spice-agent v0.1.0-preview.4
-	golang.org/x/mod v0.38.0
+	golang.org/x/mod v0.40.0
 )
 
 require (
@@ -19,7 +19,7 @@ require (
 	github.com/tidwall/sjson v1.2.5 // indirect
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/tools v0.48.0 // indirect
+	golang.org/x/tools v0.49.0 // indirect
 )
 
 tool github.com/spice-framework/toolchain/cmd/spice
