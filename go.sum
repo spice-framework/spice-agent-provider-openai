@@ -1,7 +1,9 @@
+github.com/coder/websocket v1.8.15 h1:6B2JPeOGlpff2Uz6vOEH1Vzpi0iUz20A+lPVhPHtNUA=
+github.com/coder/websocket v1.8.15/go.mod h1:NX3SzP+inril6yawo5CQXx8+fk145lPDC6pumgx0mVg=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
-github.com/openai/openai-go/v3 v3.50.0 h1:CXn+C8a10oQiI5CMyMbCiykhITVhVxhdHX8j3CfLa2U=
-github.com/openai/openai-go/v3 v3.50.0/go.mod h1:Ogjo0gDct+Jm7yCqaCjLGQGygeV8xNfNHV1/yKvCji0=
+github.com/openai/openai-go/v3 v3.71.2 h1:syc1zjR3BWyyz0D58u+YzRJ+y11eOjfWzQ8HQV57/Rg=
+github.com/openai/openai-go/v3 v3.71.2/go.mod h1:+dSPa+nbX+dNoXg1jecMnVpgRP+E/5IBA6Jiz9Pc8WM=
 github.com/spice-framework/spice v0.1.0-preview.4.0.20260814014712-5f535e696300 h1:/vsT7MMOHkN2WzZFqJRlhdOOQ0dcVlIjTOQYbBGLPaE=
 github.com/spice-framework/spice v0.1.0-preview.4.0.20260814014712-5f535e696300/go.mod h1:7SS2rRKmU0jGJ71pMjCwonezkhJYjvLNDi6q6hhaLb8=
 github.com/spice-framework/spice-agent v0.1.0-preview.4 h1:DB8/zvFlpegLl3MWqwBj7JJQvbUoAnomOafRKs/NJbU=

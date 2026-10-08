@@ -5,13 +5,14 @@ go 1.26.0
 toolchain go1.26.6
 
 require (
-	github.com/openai/openai-go/v3 v3.50.0
+	github.com/openai/openai-go/v3 v3.71.2
 	github.com/spice-framework/spice v0.1.0-preview.4.0.20260814014712-5f535e696300
 	github.com/spice-framework/spice-agent v0.1.0-preview.4
 	golang.org/x/mod v0.38.0
 )
 
 require (
+	github.com/coder/websocket v1.8.15 // indirect
 	github.com/spice-framework/toolchain v0.1.0-preview.1.0.20260806203056-d0b9ac086bd6 // indirect
 	github.com/tidwall/gjson v1.19.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
